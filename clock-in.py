@@ -9,6 +9,7 @@ import datetime
 import time
 import sys
 import ddddocr
+import requests
 
 
 class ClockIn(object):
@@ -185,25 +186,50 @@ def main(username, password):
         res = dk.post()
         if str(res['e']) == '0':
             print('已为您打卡成功！')
+            data = {
+                "text":'已为您打卡成功！',
+                "desp":'已为您打卡成功！'
+            }
         else:
             print(res['m'])
             if res['m'].find("已经") != -1: # 已经填报过了 不报错
+                data = {
+                    "text":'今天已经填报了！',
+                    "desp":'今天已经填报了！'
+                }
                 pass
             elif res['m'].find("验证码错误") != -1: # 验证码错误
                 print('再次尝试')
+                data = {
+                    "text":'验证码错误！',
+                    "desp":'验证码错误！'
+                }
                 time.sleep(5)
                 main(username, password)
                 pass
             else:
+                data = {
+                    "text":'未知错误！',
+                    "desp":'未知错误！'
+                }
                 raise Exception
     except Exception:
         print('数据提交失败')
+        data = {
+                    "text":'数据提交失败！',
+                    "desp":'数据提交失败！'
+                }
         raise Exception
+        
+    req = requests.post(api,data = data)
 
 
 if __name__ == "__main__":
     username = sys.argv[1]
     password = sys.argv[2]
+    api = "https://sc.ftqq.com/SCT151028TXgGTTlHi9ZM3dr7wOtY6KKtc.send"
+    title = "这是初始化标题"
+    content = "这是初始化内容"
     try:
         main(username, password)
     except Exception:
